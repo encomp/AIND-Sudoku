@@ -130,17 +130,15 @@ def naked_twins(values):
                 twins[box[1]].update(box[0])
             else:
                 twins[box[1]] = set(box[0])
-    # Pruning elements less than one
-    prune = [key for key in twins if len(twins[key]) < 2]
+    # Pruning elements with length different than two
+    prune = [key for key in twins if len(twins[key]) != 2]
     for key in prune:
         del twins[key]
-    # Determine naked twins per row and per col
+    # Determine if there are naked twins per row and per col
     naked_rows = dict((row, twins[row]) for row in rows
-                      if row in twins and len(twins[row]) == 2
-                        and values[row + list(twins[row])[0]] == values[row + list(twins[row])[1]])
+                      if row in twins and values[row + list(twins[row])[0]] == values[row + list(twins[row])[1]])
     naked_cols = dict((col, twins[col]) for col in cols
-                      if col in twins and len(twins[col]) == 2
-                        and values[list(twins[col])[0] + col] == values[list(twins[col])[1] + col])
+                      if col in twins and values[list(twins[col])[0] + col] == values[list(twins[col])[1] + col])
     # Eliminate the naked twins as possibilities for their peers rows
     for row in naked_rows:
         new_cols = cols
