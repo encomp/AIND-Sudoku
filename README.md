@@ -3,11 +3,14 @@
 
 # Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?  
-A: *Student should provide answer here*
+A: This is being repeatedly with the use of bread first search to solve a
+given sudoku.
 
 # Question 2 (Diagonal Sudoku)
 Q: How do we use constraint propagation to solve the diagonal sudoku problem?  
-A: *Student should provide answer here*
+A: This can be achieved by defining the proper peers to the boxes that belongs
+the diagonal. Then constraint propagation will make use of different techniques
+such as elimination, only choice and naked twins.
 
 ### Install
 
