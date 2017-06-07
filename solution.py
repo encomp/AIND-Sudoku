@@ -15,18 +15,6 @@ def assign_value(values, box, value):
         assignments.append(values.copy())
     return values
 
-def naked_twins(values):
-    """Eliminate values using the naked twins strategy.
-    Args:
-        values(dict): a dictionary of the form {'box_name': '123456789', ...}
-
-    Returns:
-        the values dictionary with the naked twins eliminated from peers.
-    """
-
-    # Find all instances of naked twins
-    # Eliminate the naked twins as possibilities for their peers
-
 rows = 'ABCDEFGHI'
 cols = '123456789'
 
@@ -38,6 +26,7 @@ boxes = cross(rows, cols)
 row_units = [cross(r, cols) for r in rows]
 column_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
+diag_units = [rows[c] + str(c+1) for c in (0,1,2,3,4,5,6,7,8)]
 unitlist = row_units + column_units + square_units
 units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
 peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
@@ -108,6 +97,30 @@ def only_choice(values):
             dplaces = [box for box in unit if digit in values[box]]
             if len(dplaces) == 1:
                 values[dplaces[0]] = digit
+    return values
+
+def naked_twins(values):
+    """Eliminate values using the naked twins strategy.
+    Args:
+        values(dict): a dictionary of the form {'box_name': '123456789', ...}
+
+    Returns:
+        the values dictionary with the naked twins eliminated from peers.
+    """
+
+    # Find all instances of naked twins
+    twin = []
+    for box in boxes:
+        if len(values[box]) == 2:
+            twin.append(box)
+
+    # Eliminate the naked twins as possibilities for their peers
+    for box in twin:
+        dplace = [peer for peer in peers[box] if len(values[peer]) > 2]
+        for peer in dplace:
+            digits = values[box]
+            for digit in digits:
+                values[peer] = values[peer].replace(digit, '')
     return values
 
 def reduce_puzzle(values):
