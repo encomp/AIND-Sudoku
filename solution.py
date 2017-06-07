@@ -60,7 +60,6 @@ def grid_values(grid):
     assert len(values) == 81
     return dict(zip(boxes, values))
 
-
 def display(values):
     """
     Display the values as a 2-D grid.
@@ -74,7 +73,6 @@ def display(values):
                       for c in cols))
         if r in 'CF': print(line)
     return
-
 
 def eliminate(values):
     """Eliminate values from peers of each box with a single value.
@@ -94,7 +92,6 @@ def eliminate(values):
             values[peer] = values[peer].replace(digit, '')
     return values
 
-
 def only_choice(values):
     """Finalize all values that are the only choice for a unit.
 
@@ -110,7 +107,6 @@ def only_choice(values):
             if len(dplaces) == 1:
                 values[dplaces[0]] = digit
     return values
-
 
 def naked_twins(values):
     """Eliminate values using the naked twins strategy.
@@ -169,7 +165,6 @@ def naked_twins(values):
                     values[box] = values[box].replace(di, '')
     return values
 
-
 def reduce_puzzle(values):
     """
     Iterate eliminate() and only_choice(). If at some point, there is a box with no available values, return False.
@@ -189,7 +184,6 @@ def reduce_puzzle(values):
         if len([box for box in values.keys() if len(values[box]) == 0]):
             return False
     return values
-
 
 def search(values):
     "Using depth-first search and propagation, try all possible values."
