@@ -1,5 +1,29 @@
-assignments = []
+# Sudoku AI
 
+def cross(a, b):
+    return [s + t for s in a for t in b]
+
+def diag_peers(peers):
+    for diagonal in diagonals:
+        for box in diagonal:
+            peers[box].update(diagonal)
+            peers[box].remove(box)
+    return peers
+
+assignments = []
+rows = 'ABCDEFGHI'
+cols = '123456789'
+boxes = cross(rows, cols)
+row_units = [cross(r, cols) for r in rows]
+column_units = [cross(rows, c) for c in cols]
+square_units = [cross(rs, cs) for rs in ('ABC', 'DEF', 'GHI') for cs in ('123', '456', '789')]
+diag_one = set(rows[c] + str(c + 1) for c in (0, 1, 2, 3, 4, 5, 6, 7, 8))
+diag_two = set(rows[c] + str(9 - c) for c in (0, 1, 2, 3, 4, 5, 6, 7, 8))
+diagonals = [diag_one, diag_two]
+unitlist = row_units + column_units + square_units
+units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
+peers = dict((s, set(sum(units[s], [])) - set([s])) for s in boxes)
+peers = diag_peers(peers)
 
 def assign_value(values, box, value):
     """
@@ -15,38 +39,6 @@ def assign_value(values, box, value):
     if len(value) == 1:
         assignments.append(values.copy())
     return values
-
-
-rows = 'ABCDEFGHI'
-cols = '123456789'
-
-
-def cross(a, b):
-    return [s + t for s in a for t in b]
-
-
-boxes = cross(rows, cols)
-row_units = [cross(r, cols) for r in rows]
-column_units = [cross(rows, c) for c in cols]
-square_units = [cross(rs, cs) for rs in ('ABC', 'DEF', 'GHI') for cs in ('123', '456', '789')]
-diag_one = set(rows[c] + str(c + 1) for c in (0, 1, 2, 3, 4, 5, 6, 7, 8))
-diag_two = set(rows[c] + str(9 - c) for c in (0, 1, 2, 3, 4, 5, 6, 7, 8))
-diagonals = [diag_one, diag_two]
-unitlist = row_units + column_units + square_units
-units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
-peers = dict((s, set(sum(units[s], [])) - set([s])) for s in boxes)
-
-
-def diag_peers(peers):
-    for diagonal in diagonals:
-        for box in diagonal:
-            peers[box].update(diagonal)
-            peers[box].remove(box)
-    return peers
-
-
-peers = diag_peers(peers)
-
 
 def grid_values(grid):
     """Convert grid string into {<box>: <value>} dict with '123456789' value for empties.
@@ -218,7 +210,6 @@ def search(values):
         if attempt:
             return attempt
 
-
 def solve(grid):
     """
     Find the solution to a Sudoku grid.
@@ -229,7 +220,6 @@ def solve(grid):
         The dictionary representation of the final sudoku grid. False if no solution exists.
     """
     return search(grid_values(grid))
-
 
 if __name__ == '__main__':
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
