@@ -109,13 +109,13 @@ def naked_twins(values):
     """
 
     # Find all instances of naked twins
-    twin = []
+    twins = []
     for box in boxes:
         if len(values[box]) == 2:
-            twin.append(box)
+            twins.append(box)
 
     # Eliminate the naked twins as possibilities for their peers
-    for box in twin:
+    for box in twins:
         dplace = [peer for peer in peers[box] if len(values[peer]) > 2]
         for peer in dplace:
             digits = values[box]
