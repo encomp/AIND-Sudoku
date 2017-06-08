@@ -108,6 +108,73 @@ def only_choice(values):
                 values[dplaces[0]] = digit
     return values
 
+def find_twins(values, pair_boxes, array):
+    pairs = list()
+    for row in array:
+        new_boxes = pair_boxes & set(row)
+        row_pairs = dict()
+        if len(new_boxes) > 1:
+            for box in new_boxes:
+                key = values[box]
+                if key not in row_pairs:
+                    row_pairs[key] = list()
+                row_pairs[key].append(box)
+            pairs.append(row_pairs)
+    naked_twins = list()
+    for row_pairs in pairs:
+        for key in row_pairs:
+            if len(row_pairs[key]) == 2:
+                tmp = dict()
+                tmp[key] = list(row_pairs[key])
+                naked_twins.append(tmp)
+    return naked_twins
+
+def eliminate_twins(values, naked_twins, array, index):
+    alpha = False
+    if index == 0:
+        alpha = True
+    for twins in naked_twins:
+        for key in twins:
+            digits = key
+            boxes = twins[key]
+            row = boxes[0][index]
+            if alpha:
+                row = rows.index(row)
+            else:
+                row = int(row) - 1
+            boxes = set(array[row]) - set(boxes)
+            for box in boxes:
+                if len(values[box]) > 1:
+                    for digit in digits:
+                        values[box] = values[box].replace(digit, '')
+    return values
+
+
+def find_diagonal_twins(values, pair_boxes, diagonal):
+    new_boxes = pair_boxes & diagonal
+    diagonal_pairs = dict()
+    for box in new_boxes:
+        key = values[box]
+        if key not in diagonal_pairs:
+            diagonal_pairs[key] = list()
+        diagonal_pairs[key].append(box)
+    twin_diagonal = dict()
+    for key in diagonal_pairs:
+        if len(diagonal_pairs[key]) == 2:
+            twin_diagonal[key] = diagonal_pairs[key]
+    return twin_diagonal
+
+def eliminate_diagonal_twins(values, twin_diagonal, diagonal):
+    for key in twin_diagonal:
+        digits = key
+        twin_boxes = set(twin_diagonal[key])
+        boxes = diagonal - twin_boxes
+        for box in boxes:
+            if len(values[box]) > 1:
+                for digit in digits:
+                    values[box] = values[box].replace(digit, '')
+    return values
+
 def naked_twins(values):
     """Eliminate values using the naked twins strategy.
     Args:
@@ -118,49 +185,26 @@ def naked_twins(values):
     """
 
     # Find all instances of naked twins
+    display(values)
     # Define a dictionary per row and col with boxes of length two
-    twins = {}
+    pair_boxes = list()
     for box in boxes:
         if len(values[box]) == 2:
-            if box[0] in twins:
-                twins[box[0]].update(box[1])
-            else:
-                twins[box[0]] = set(box[1])
-            if box[1] in twins:
-                twins[box[1]].update(box[0])
-            else:
-                twins[box[1]] = set(box[0])
-    # Pruning elements with length different than two
-    prune = [key for key in twins if len(twins[key]) != 2]
-    for key in prune:
-        del twins[key]
+            pair_boxes.append(box)
+    pair_boxes = set(pair_boxes)
+    print(pair_boxes)
     # Determine if there are naked twins per row and per col
-    naked_rows = dict((row, twins[row]) for row in rows
-                      if row in twins and values[row + list(twins[row])[0]] == values[row + list(twins[row])[1]])
-    naked_cols = dict((col, twins[col]) for col in cols
-                      if col in twins and values[list(twins[col])[0] + col] == values[list(twins[col])[1] + col])
+    naked_rows = find_twins(values, pair_boxes, row_units)
+    naked_cols = find_twins(values, pair_boxes, column_units)
+    naked_dia_one = find_diagonal_twins(values, pair_boxes, diag_one)
+    naked_dia_two = find_diagonal_twins(values, pair_boxes, diag_two)
     # Eliminate the naked twins as possibilities for their peers rows
-    for row in naked_rows:
-        new_cols = cols
-        for col in naked_rows[row]:
-            new_cols = new_cols.replace(col, '')
-        digits = values[row + list(naked_rows[row])[0]]
-        for col in new_cols:
-            box = row + col
-            if len(values[box]) > 1:
-                for digit in digits:
-                    values[box] = values[box].replace(digit, '')
-    # Eliminate the naked twins as possibilities for their peers cols
-    for col in naked_cols:
-        new_rows = rows
-        for row in naked_cols[col]:
-            new_rows = new_rows.replace(row, '')
-        digits = values[list(naked_cols[col])[0] + col]
-        for row in new_rows:
-            box = row + col
-            if len(values[box]) > 1:
-                for di in digits:
-                    values[box] = values[box].replace(di, '')
+    values = eliminate_twins(values, naked_rows, row_units, 0)
+    values = eliminate_twins(values, naked_cols, column_units, 1)
+    values = eliminate_diagonal_twins(values, naked_dia_one, diag_one)
+    values = eliminate_diagonal_twins(values, naked_dia_two, diag_two)
+    print("\n")
+    display(values)
     return values
 
 def reduce_puzzle(values):
