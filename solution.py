@@ -154,7 +154,6 @@ def eliminate_digits(values, digits, boxes):
     for box in boxes:
         for digit in digits:
             values[box] = values[box].replace(digit, '')
-            assign_value(values, boxes, values[box])
 
 def eliminate_twins_units(values, twin_boxes):
     """Eliminate all the naked twins on Sudoku.
@@ -173,6 +172,7 @@ def eliminate_twins_units(values, twin_boxes):
         all_boxes = boxes_1 & boxes_2
         # Update boxes with length greater than one
         boxes = [box for box in all_boxes if len(values[box]) > 1]
+        # Determine the digits that needs to be eliminated
         digits = values[box_one]
         eliminate_digits(values, digits, boxes)
     return values
