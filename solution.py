@@ -111,14 +111,16 @@ def only_choice(values):
 def find_twins(values, box_pairs):
     """Determine all the naked twins that exist on the Sudoku.
     
-    Input: Sudoku in dictionary form and all boxes wiht length of two.
+    Input: Sudoku in dictionary form and all boxes with length of two.
     Output: Resulting naked twins dictionary.
     """
-
     naked_twins = dict()
     for twin_box in box_pairs:
         boxes = peers[twin_box]
         pairs = box_pairs & boxes
+        # Define a dictionary to determine if there are pairs with same value in the
+        # same unit. The key of the dictionary is the numeric value of a box and the
+        # dictionary value will be a list of the boxes. Such as {'27':['H1', 'A1']}.
         value_boxes = dict()
         value_boxes[values[twin_box]] = list()
         value_boxes[values[twin_box]].append(twin_box)
@@ -129,34 +131,47 @@ def find_twins(values, box_pairs):
                 value_boxes[value].append(box)
             else:
                 value_boxes[value].append(box)
+        # From the dictionary built above determine if there are naked twins.
+        # The key of the dictionary will be a pair of boxes sorted such as "A1H1"
+        # and the value will be a sorted list of such boxes like (['A1', 'H1']).
         for value in value_boxes:
             if len(value_boxes[value]) == 2:
                 pairs = sorted(value_boxes[value])
                 size_diag_one = len(diag_one & set(pairs))
                 size_diag_two = len(diag_two & set(pairs))
                 key = pairs[0] + pairs[1]
+                # This rule determine if are naked pairs if two boxes belongs to the same row, column or diagonal.
                 if key not in naked_twins and (pairs[0][0] == pairs[1][0] or pairs[0][1] == pairs[1][1]
                                                or size_diag_one == 2 or size_diag_two == 2):
                     naked_twins[key] = pairs
     return naked_twins
 
 def eliminate_digits(values, digits, boxes):
-    """Eliminate all the naked twins on Sudoku.
+    """Eliminate all the provided digits from the provided boxes.
 
     Input: Sudoku in dictionary form, digits that will be replaced on the given boxes.
     """
     for box in boxes:
         for digit in digits:
             values[box] = values[box].replace(digit, '')
+            assign_value(values, boxes, values[box])
 
 def eliminate_twins_units(values, twin_boxes):
+    """Eliminate all the naked twins on Sudoku.
+
+    Input: Sudoku in dictionary form and the naked twins that need to be eliminated in the Sudoku.
+    Output: Resulting Sudoku in dictionary form after eliminating naked twins.
+    """
     for key in twin_boxes:
+        # Extract the pair of naked twins that will be used
         twins = twin_boxes[key]
         box_one = twins[0]
         box_two = twins[1]
+        # Determine the boxes that needs to be updated
         boxes_1 = peers[box_one]
         boxes_2 = peers[box_two]
         all_boxes = boxes_1 & boxes_2
+        # Update boxes with length greater than one
         boxes = [box for box in all_boxes if len(values[box]) > 1]
         digits = values[box_one]
         eliminate_digits(values, digits, boxes)
@@ -170,23 +185,17 @@ def naked_twins(values):
     Returns:
         the values dictionary with the naked twins eliminated from peers.
     """
-
-    # Find all instances of naked twins
-    print("\n")
-    display(values)
-
     pair_boxes = list()
+    # Find all the boxes with length of two
     for box in boxes:
         if len(values[box]) == 2:
             pair_boxes.append(box)
+    # Remove all the duplicate boxes
     pair_boxes = set(pair_boxes)
-    print(sorted(pair_boxes))
+    # Determine the proper naked twins
     naked_twins = find_twins(values, pair_boxes)
-    print(sorted(naked_twins))
+    # Eliminate all the naked twins from the Sudoku
     eliminate_twins_units(values, naked_twins)
-
-    print("\n")
-    display(values)
     return values
 
 def reduce_puzzle(values):
